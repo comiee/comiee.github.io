@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>OOC生成器</title>
+    <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.js"></script>
+    <style>
+        .text {
+            height: 500px;
+            width: 500px;
+            border: 1px solid;
+            float: left;
+            overflow-y: auto;
+        }
+
+        .text:empty::before {
+            color: lightgrey;
+            content: attr(placeholder);
+        }
+
+        #in {
+            overflow: auto;
+        }
+
+        #out {
+            word-wrap: break-word;
+        }
+
+        #btn {
+            width: 100px;
+        }
+    </style>
+</head>
+<body>
+<div class="select">
+    <label for="version">请选择版本：</label>
+    <select id="version">
+        <option value="0">1.13</option>
+        <option value="1">1.12</option>
+    </select>
+    <label for="mode">请选择执行方式：</label>
+    <select id="mode">
+        <option value="0">脉冲命令方块</option>
+        <option value="1">循环命令方块</option>
+        <option value="2">命令方块矿车</option>
+    </select>
+</div>
+<div class="main">
+    <label for="in"></label>
+    <div class="text" id="in" contenteditable=true placeholder="请输入命令">
+        <div></div>
+    </div>
+    <label for="btn"></label>
+    <div class="text" id="btn"></div>
+    <label for="out"></label>
+    <div class="text" id="out" contenteditable=true placeholder="这里会自动生成ooc"></div>
+</div>
+<script>
+    $(function (arrayLike) {
+        const c1 = [
+            '/summon falling_block ~ ~2 ~ {BlockState:{Name:"command_block",Properties:{facing:"up"}},TileEntityData:{Command:"",auto:1b},Time:1%}',
+            '/summon falling_block ~ ~2 ~ {BlockState:{Name:"repeating_command_block",Properties:{facing:"up"}},TileEntityData:{Command:"",auto:1b},Time:1%}',
+            '/summon falling_block ~ ~2 ~ {BlockState:{Name:"redstone_block"},Time:1,Passengers:[{id:falling_block,Time:1,BlockState:{Name:"activator_rail"},Time:1}%]}',
+            '/summon falling_block ~ ~2 ~ {Block:command_block,Data:1,TileEntityData:{Command:"",auto:1b},Time:1%}',
+            '/summon falling_block ~ ~2 ~ {Block:repeating_command_block,Data:1,TileEntityData:{Command:"",auto:1b},Time:1%}',
+            '/summon falling_block ~ ~2 ~ {Block:redstone_block,Time:1,Passengers:[{id:falling_block,Time:1,Block:activator_rail,Time:1}%]}'
+        ];
+        const c2 = [
+            ',Passengers:[{id:falling_block,Time:1,auto:1,BlockState:{Name:"command_block",Properties:{facing:"up"}},TileEntityData:{Command:"%c",auto:1b},Time:1%p}]',
+            ',Passengers:[{id:falling_block,Time:1,auto:1,BlockState:{Name:"chain_command_block",Properties:{facing:"up"}},TileEntityData:{Command:"%c",auto:1b},Time:1%p}]',
+            ',{id:command_block_minecart,Command:"%c"}%p',
+            ',Passengers:[{id:falling_block,Time:1,auto:1,Data:1,Block:command_block,TileEntityData:{Command:"%c",auto:1b},Time:1%p}]',
+            ',Passengers:[{id:falling_block,Time:1,auto:1,Data:1,Block:chain_command_block,TileEntityData:{Command:"%c",auto:1b},Time:1%p}]',
+            ',{id:commandblock_minecart,Command:"%c"}%p'
+        ];
+
+        function update() {
+            let index = $('#version').val() * 3 - -$('#mode').val();
+            $('#out').text(c1[index].replace('%',
+                Array.from($('#in>*'), element => element.innerText).reduceRight((s, com) => {
+                    return c2[index].replace(/%./g, r => ({'%c': com.replace(/[\\"]/g, s => '\\' + s), '%p': s}[r]));
+                }, '')
+            ));
+        }
+
+        $('#in').bind("input propertychange", update);
+        $('.select select').change(update);
+
+        $('#in').bind("input propertychange", function () {
+            $('#btn').empty();
+            $('#in>*').each(function () {
+                $('#btn').append(`
+                    <div class="opt">
+                        <button>1</button>
+                        <button>1</button>
+                        <button>1</button>
+                    </div>
+                `)
+            })
+        });
+        $('#in').scroll(function () {
+            $('#btn').scrollTop($(this).scrollTop())
+        });
+        $('#btn').scroll(function () {
+            $('#in').scrollTop($(this).scrollTop())
+        })
+    })
+</script>
+</body>
+</html>
