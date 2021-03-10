@@ -14,7 +14,7 @@
 <label for="answer"><input type="text" id="answer"></label>
 <button id="ok">提交</button>
 <button id="next">下一题</button>
-<p id="result"></p>
+<h2 id="result"></h2>
 <script>
     $(function () {
         const bad = ["1111", "1112", "1113", "1114", "1115", "1116", "1117",
@@ -54,9 +54,9 @@
         };
         const submit = function () {
             if (check($('#answer').val())) {
-                $('#result').html('<h2><span style="color: green; ">回答正确</span></h2>');
+                $('#result').html('<span style="color: green; ">回答正确</span>');
             } else {
-                $('#result').html('<h2><span style="color: red; ">回答错误</span></h2>');
+                $('#result').html('<span style="color: red; ">回答错误</span>');
             }
         };
         $('#ok').click(submit);
