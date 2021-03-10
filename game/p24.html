@@ -40,7 +40,7 @@
                         temp.push(num);
                     }
                 }
-            } while (bad.includes(Array.from(temp).sort().join("")));
+            } while (bad.includes(Array.from(temp).sort().join("")));//Array.from用于拷贝
             problem = temp.join("");
             $('#question').text(temp.join(" "));
         };
@@ -49,7 +49,7 @@
             if (!/^[\d+\-*/^()]+$/.test(s)) return false;
             let nums = s.replace(/\D/g, '');
             if (nums.length !== 4) return false;
-            if (problem === Array.from(nums).sort().join("")) return false;
+            if (Array.from(problem).sort().join("") !== Array.from(nums).sort().join("")) return false;
             return eval(s) === 24;
         };
         const submit = function () {
