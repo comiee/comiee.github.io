@@ -12,7 +12,7 @@
 <p>所有的数必须全部使用且只能使用一次。</p>
 <h2 id="question"></h2>
 <label for="answer"><input type="text" id="answer"></label>
-<button id="submit">提交</button>
+<button id="ok">提交</button>
 <button id="next">下一题</button>
 <p id="result"></p>
 <script>
@@ -59,7 +59,7 @@
                 $('#result').html('<h2><span style="color: red; ">回答错误</span></h2>');
             }
         };
-        $('#submit').click(submit);
+        $('#ok').click(submit);
         $('#next').click(create_question);
         $("#answer").keypress(function (e) {
             if (e.which === 13) {
