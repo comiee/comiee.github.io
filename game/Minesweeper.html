@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.staticfile.org/vue/2.2.2/vue.min.js"></script>
+    <script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
+    <title>扫雷</title>
+    <style>
+        #app {
+            text-align: center;
+        }
+
+        .block {
+            width: 30px;
+            height: 30px;
+            vertical-align: middle;
+            background-color: #ccc;
+            border: outset;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <div id="top">
+        <p style="display:inline-block">{{n}}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+        <button class="block" @click="location.reload()">{{rbs}}</button>
+        <p style="display:inline-block">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{t}}</p>
+    </div>
+    <div id="blocks" v-for="j in ys">
+        <button v-for="i in xs" :id="j+'-'+i" class="block"
+                @click="click_left(j-1,i-1)"
+                @contextmenu="click_right($event)"></button>
+        <br/>
+    </div>
+</div>
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            xs: 9,      //横向格数
+            ys: 9,      //纵向格数
+            ln: 10,     //雷的数量
+            n: 10,      //左上角显示的剩余雷数
+            t: 0,       //计时
+            tm:null,    //计时器
+            rbs: "",    //重玩按钮显示的字符
+            dat: [],    //数据，代表意义如下：
+            // 0~8代表雷数
+            // 9代表雷
+            // 空格代表被翻开的0
+        },
+        methods: {
+            //左键事件
+            click_left(j, i) {
+                let obj = $(`#${j + 1}-${i + 1}`);
+                if (obj.text() !== '') return;
+                obj.attr('disabled', 'disabled');
+                obj.css('background-color', '#eee');
+                obj.css('border', 'solid');
+                if (this.dat[j][i] === 9) {
+                    //失败
+                    obj.text('💣');
+                    this.rbs = "😫";
+                    obj.css('background-color', '#f00');
+                    //连锁翻开所有雷
+                    for (let y = 0; y < this.ys; y++) {
+                        for (let x = 0; x < this.xs; x++) {
+                            if (this.dat[y][x] === 9) {
+                                let o = $(`#${y + 1}-${x + 1}`);
+                                if (o.text() === '🚩') {
+                                    o.text('✔');
+                                } else {
+                                    this.click_left(y, x)
+                                }
+                            }
+                        }
+                    }
+                    this.click_left = null;
+                    this.click_right = null;
+                    clearInterval(this.tm);
+                } else if (this.dat[j][i] === 0) {
+                    //连锁翻开周围方块
+                    this.dat[j][i] = ' ';
+                    for (let y = j - 1; y <= j + 1; y++) {
+                        for (let x = i - 1; x <= i + 1; x++) {
+                            if (0 <= y && y < this.ys && 0 <= x && x < this.xs) {
+                                this.click_left(y, x)
+                            }
+                        }
+                    }
+                } else {
+                    obj.text(this.dat[j][i]);
+                }
+                //判断是否胜利
+                let flag = 1;
+                for (let y = 0; y < this.ys; y++) {
+                    for (let x = 0; x < this.xs; x++) {
+                        s = $(`#${y + 1}-${x + 1}`).text();
+                        if (s === '🚩' || s === '❓' || s === '') {
+                            if (this.dat[y][x] !== 9) {
+                                flag = 0;
+                                break;
+                            }
+                        }
+                    }
+                }
+                if(flag){
+                    alert('恭喜你赢了！用时'+this.t+'秒');
+                    this.click_left = null;
+                    this.click_right = null;
+                    clearInterval(this.tm);
+                }
+            },
+            //右键事件
+            click_right(e) {
+                console.log(e.target.innerText);
+                switch (e.target.innerText) {
+                    case '':
+                        e.target.innerText = '🚩';
+                        this.n--;
+                        break;
+                    case '🚩':
+                        e.target.innerText = '❓';
+                        this.n++;
+                        break;
+                    case '❓':
+                        e.target.innerText = '';
+                        break;
+                }
+            }
+        },
+        mounted() {
+            this.rbs = "😊";
+            this.dat = Array.from({length: this.ys}, () => Array.from({length: this.xs}, () => 0));
+
+            //初始化雷
+            for (let n = this.ln; n;) {
+                let j = Math.floor(Math.random() * this.ys);
+                let i = Math.floor(Math.random() * this.xs);
+                if (this.dat[j][i] !== 9) {
+                    this.dat[j][i] = 9;
+                    n--;
+                }
+            }
+            //初始化数字
+            for (let j = 0; j < this.ys; j++) {
+                for (let i = 0; i < this.xs; i++) {
+                    if (this.dat[j][i] === 9) {
+                        for (let y = j - 1; y <= j + 1; y++) {
+                            for (let x = i - 1; x <= i + 1; x++) {
+                                if (this.dat[y] && this.dat[y][x] !== 9) {
+                                    this.dat[y][x]++;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            //禁用原始右键
+            document.oncontextmenu = () => false;
+            this.tm=setInterval(() => this.t++, 1000);
+        }
+    });
+</script>
+</body>
+</html>
