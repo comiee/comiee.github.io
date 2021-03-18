@@ -105,10 +105,11 @@
                     }
                 }
                 if(flag){
-                    alert('恭喜你赢了！用时'+this.t+'秒');
+                    this.rbs = "😎";
                     this.click_left = null;
                     this.click_right = null;
                     clearInterval(this.tm);
+                    alert('恭喜你赢了！用时'+this.t+'秒');
                 }
             },
             //右键事件
